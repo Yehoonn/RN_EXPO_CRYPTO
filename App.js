@@ -23,6 +23,7 @@ export default function App() {
   );
   const [data, setData] = React.useState([]);
   const [market, setMarket] = React.useState([]);
+  let test;
 
   const renderItem = ({ item, index }) => {
     const name = market.filter((item2) => item2.market === item.market)[0];
