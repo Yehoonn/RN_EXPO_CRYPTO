@@ -22,13 +22,57 @@ export default function App() {
     Math.floor(Math.random() * 15000).toLocaleString()
   );
   const [data, setData] = React.useState([]);
+  const [market, setMarket] = React.useState([]);
 
   const renderItem = ({ item, index }) => {
+    const name = market.filter((item2) => item2.market === item.market)[0];
     return (
-      <View>
-        <Text style={{ fontSize: hp(2), fontColor: "#fff" }}>
-          {item?.trade_price}
-        </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          width: wp(80),
+          marginHorizontal: wp(10),
+          height: hp(10),
+          borderBottomWidth: 1,
+          borderColor: "#aaa",
+          justifyContent: "center",
+        }}
+      >
+        <View style={{ width: wp(20), justifyContent: "center" }}>
+          <Image
+            source={
+              item.market.split("-")[1] === "BTC"
+                ? require("./assets/btc.png")
+                : item.market.split("-")[1] === "XRP"
+                ? require("./assets/xrp.png")
+                : item.market.split("-")[1] === "DOGE"
+                ? require("./assets/doge.png")
+                : require("./assets/eth.png")
+            }
+            style={{ width: wp(12), height: wp(12) }}
+          ></Image>
+        </View>
+        <View style={{ width: wp(25), justifyContent: "center" }}>
+          <Text style={{ fontSize: hp(2), color: "#aaa", fontWeight: "bold" }}>
+            {name.english_name}
+          </Text>
+          <Text style={{ fontSize: hp(1.5), color: "#aaa" }}>
+            {item.market.split("-")[1]}
+          </Text>
+        </View>
+        <View style={{ width: wp(30), justifyContent: "center" }}>
+          <Text style={{ fontSize: hp(2), color: "#fff" }}>
+            ￦ {item?.trade_price.toLocaleString()}
+          </Text>
+          <Text
+            style={{
+              fontSize: hp(1.5),
+              color: item?.signed_change_rate > 0 ? "red" : "lightblue",
+            }}
+          >
+            {(item?.signed_change_rate * 100).toPrecision(2)}%
+          </Text>
+        </View>
       </View>
     );
   };
@@ -40,11 +84,14 @@ export default function App() {
 
     const timer = setTimeout(async () => {
       try {
-        let response = await axios.get(
-          "https://api.upbit.com/v1/ticker?markets=KRW-BTC,BTC-ETH"
+        const market = await axios.get(
+          "https://api.upbit.com/v1/market/all?isDetails=false"
         );
-
-        console.log(response);
+        let response = await axios.get(
+          "https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-ETH,KRW-XRP,KRW-DOGE,KRW-SOL"
+        );
+        setMarket(market.data);
+        setData(response.data);
       } catch (error) {
         console.error(error);
       }
@@ -129,24 +176,24 @@ export default function App() {
           </View>
         </PagerView>
 
-        <View>
+        <View style={{ flex: 1 }}>
           <FlatList
             data={data}
             keyExtractor={(item, index) => {
-              index.toString();
+              return index.toString();
             }}
             renderItem={renderItem}
           ></FlatList>
-        </View>
 
-        <Pressable
-          style={styles.button}
-          onPress={() => {
-            setReady(false);
-          }}
-        >
-          <Text style={styles.buttonFont}>돌아가기</Text>
-        </Pressable>
+          {/* <Pressable
+            style={styles.button}
+            onPress={() => {
+              setReady(false);
+            }}
+          >
+            <Text style={styles.buttonFont}>돌아가기</Text>
+          </Pressable> */}
+        </View>
       </View>
     );
   }
